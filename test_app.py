@@ -65,3 +65,12 @@ class UserTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h4>New First Name:</h4>', html)
+
+    def test_add_post_page(self):
+        with app.test_client() as client:
+            resp = client.get(f"/users/{self.user_id}/posts/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h4>Title:</h4>', html)
+            

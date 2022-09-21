@@ -6,17 +6,23 @@
 
 <h1>More information</h1>
 
-{% if user %}
-
-    <img src="{{ user.image_url }}">
-    <p>{{ user.first_name }} {{ user.last_name }}</p>
-
-{% endif %}
+<img src="{{ user.image_url }}">
+<p>{{ user.full_name() }}</p>
 
 <a href="/users/{{ user.id }}/edit">Edit user</a>
 
 <form action="/users/{{ user.id }}/delete" method="POST">
     <button>Delete User</button>
 </form>
+
+<h1>Posts</h1>
+
+{% for post in user.posts %}
+    <li>
+        <a href="/posts/{{ post.id }}">{{ post.title }}</a>
+    </li>
+{% endfor %}
+
+<a href="/users/{{ user.id }}/posts/new">Add post</a>
 
 {% endblock %}

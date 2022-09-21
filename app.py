@@ -2,7 +2,7 @@
 
 from flask import Flask, request, render_template, redirect
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User
+from models import db, connect_db, User, Post
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
@@ -82,3 +82,65 @@ def delete_user(userid):
 
     return redirect('/users')
 
+@app.route('/users/<int:userid>/posts/new', methods=["GET"])
+def new_post_form(userid):
+    """Gives user a form to submit a new post"""
+
+    user = User.query.get_or_404(userid)
+
+    return render_template('newpostform.html', user=user)
+
+@app.route('/users/<int:userid>/posts/new', methods=["POST"])
+def post_form(userid):
+    """Gets form content and makes a post, saves to database"""
+
+    user = User.query.get_or_404(userid)
+    post_title = request.form['title']
+    post_content = request.form['content']
+
+    post = Post(title=post_title, content=post_content, user=user)
+    db.session.add(post)
+    db.session.commit()
+
+    return redirect(f"/users/{userid}")
+
+@app.route('/posts/<int:postid>')
+def view_post(postid):
+    """Views post of postid"""
+
+    post = Post.query.get_or_404(postid)
+
+    return render_template('post.html', post=post)
+
+@app.route('/posts/<int:postid>/edit')
+def view_post_edit(postid):
+    """Give form to edit a post"""
+
+    post = Post.query.get_or_404(postid)
+
+    return render_template('postedit.html', post=post)
+
+@app.route('/posts/<int:postid>/edit', methods=["POST"])
+def post_edit_submission(postid):
+    """Edit a specific post with given contents"""
+
+    post = Post.query.get_or_404(postid)
+    title = request.form['title']
+    content = request.form['content']
+
+    post.edit(title=title, content=content)
+
+    db.session.commit()
+
+    return redirect(f'/posts/{postid}')
+
+@app.route('/posts/<int:postid>/delete', methods=["POST"])
+def delete_post(postid):
+    """Deletes specified post"""
+
+    del_post = Post.query.get_or_404(postid)
+
+    db.session.delete(del_post)
+    db.session.commit()
+
+    return redirect('/users')
