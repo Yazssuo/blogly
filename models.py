@@ -46,11 +46,40 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
+    tags = db.relationship('Tag',
+                            secondary='post_tags',
+                            backref='posts')
+
     def edit(self, title, content):
         """Edits a post content"""
 
         self.title = title
         self.content = content
+
+class Tag(db.Model):
+    """Tag."""
+
+    __tablename__ = "tags"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+
+    def edit(self, name):
+        """Edits a tag name"""
+
+        self.name = name
+
+class PostTag(db.Model):
+    """PostTag."""
+
+    __tablename__ = "post_tags"
+
+    post_id = db.Column(db.Integer,
+                        db.ForeignKey('posts.id'),
+                        primary_key=True)
+    tag_id = db.Column(db.Integer,
+                        db.ForeignKey('tags.id'),
+                        primary_key=True)
 
 def connect_db(app):
     """Connect to database"""
